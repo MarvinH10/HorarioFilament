@@ -2,20 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
+use App\Filament\Resources\CargoResource\Pages;
+use App\Filament\Resources\CargoResource\RelationManagers;
+use App\Models\Cargo;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+class CargoResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Cargo::class;
+
+    protected static ?string $navigationGroup = 'Negocio';
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -23,20 +27,17 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nombre')
+                Forms\Components\Select::make('departamento_id')
+                    ->label('Departamento')
+                    ->relationship('departamento', 'nombre_departamento')
+                    ->required(),
+                Forms\Components\TextInput::make('nombre_cargo')
+                    ->label('Nombre Cargo')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->label('Correo electrónico')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password')
-                    ->label('Contraseña')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
+                    ->maxLength(100),
+                Forms\Components\Toggle::make('estado_cargo')
+                    ->label('Estado Cargo')
+                    ->default(true),
             ]);
     }
 
@@ -44,12 +45,16 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Nombre')
+                Tables\Columns\TextColumn::make('departamento.nombre_departamento')
+                    ->label('Departamento')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('Correo electrónico')
+                Tables\Columns\TextColumn::make('nombre_cargo')
+                    ->label('Nombre Cargo')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('estado_cargo')
+                    ->label('Estado Cargo')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado en')
                     ->dateTime()
@@ -62,7 +67,8 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('Estado')
+                    ->query(fn(Builder $query): Builder => $query->where('estado_cargo', true)),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -85,20 +91,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListCargos::route('/'),
+            'create' => Pages\CreateCargo::route('/create'),
+            'edit' => Pages\EditCargo::route('/{record}/edit'),
         ];
-    }
-
-    // TRADUCIR AL ESPAÑOL
-    public static function getPluralLabel(): ?string
-    {
-        return 'Usuarios';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return 'Usuarios';
     }
 }
