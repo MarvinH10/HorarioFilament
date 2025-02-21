@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
 
 class ContratoResource extends Resource
 {
@@ -19,19 +20,28 @@ class ContratoResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Documentación';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('empleado_id')
+                Select::make('empleado_id')
+                    ->label('Empleado')
+                    ->relationship('empleado', 'nombre_empleado')
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('empresa_id')
+                    ->live(),
+                Select::make('empresa_id')
+                    ->label('Empresa')
+                    ->relationship('empresa', 'nombre_empresa')
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('tipo_contrato_id')
+                    ->live(),
+                Select::make('tipo_contrato_id')
+                    ->label('Tipo de contrato')
+                    ->relationship('tipoContrato', 'nombre_tipo_contrato')
                     ->required()
-                    ->numeric(),
+                    ->live(),
+
                 Forms\Components\TextInput::make('max_hora_semanales_contrato')
                     ->required()
                     ->numeric(),
